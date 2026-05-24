@@ -28,7 +28,7 @@ export default function Login() {
             }
 
             // If it made it this far, we have a real token
-            localStorage.setItem("accessToken", token);
+            localStorage.setItem("token", token);
             console.log("3. Token saved successfully. Navigating to Dashboard...");
             
             navigate("/dashboard");
