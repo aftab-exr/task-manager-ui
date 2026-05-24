@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { taskService } from "../api/taskService.js";
 import TaskCard from "../components/TaskCard.jsx";
@@ -8,21 +8,21 @@ export default function Dashboard() {
     const [newTask, setNewTask] = useState({ title: "", description: "", priority: "Low", status: "Pending" });
     const navigate = useNavigate();
 
-    const fetchTasks = async () => {
+    const fetchTasks = useCallback(async () => {
         try {
-            const res = await taskService.getMyTasks();
+            const res = await taskService.myTasks();
             setTasks(res.data || []);
         } catch (error) {
             console.error("Failed to fetch tasks:",error);
         }
-    };
+    },[])
 
-    useEffect(() => { fetchTasks(); }, []);
+    useEffect(() => { fetchTasks(); }, [fetchTasks]);
 
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            await taskService.createTask(newTask);
+            await taskService.create(newTask);
             setNewTask({ title: "", description: "", priority: "Low", status: "Pending" }); 
             fetchTasks(); 
         } catch (err) {
@@ -32,14 +32,14 @@ export default function Dashboard() {
 
     const handleStatusUpdate = async (task, newStatus) => {
         try {
-            await taskService.updateTask(task._id, { ...task, status: newStatus });
+            await taskService.update(task._id, { ...task, status: newStatus });
             fetchTasks();
         } catch (err) { alert(err); }
     };
 
     const handleDelete = async (id) => {
         try {
-            await taskService.deleteTask(id);
+            await taskService.delete(id);
             fetchTasks();
         } catch (err) { alert(err); }
     };

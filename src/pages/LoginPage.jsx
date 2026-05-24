@@ -19,7 +19,7 @@ export default function Login() {
             console.log("2. Backend responded!", res);
 
             // Let's aggressively check if the token actually exists in the response
-            const token = res?.data?.accessToken;
+            const token = res?.data?.token;
 
             if (!token) {
                 console.error("🚨 CRITICAL ERROR: The backend did not send an accessToken!");
@@ -28,7 +28,7 @@ export default function Login() {
             }
 
             // If it made it this far, we have a real token
-            localStorage.setItem("token", token);
+            localStorage.setItem("token", res.data.token);
             console.log("3. Token saved successfully. Navigating to Dashboard...");
             
             navigate("/dashboard");
