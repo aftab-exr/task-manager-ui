@@ -24,7 +24,12 @@ export default function Dashboard() {
     const fetchTasks = useCallback(async () => {
         try {
             const res = await taskService.myTasks();
-            setTasks(res.data.data || []);
+            
+            // Checks multiple common API response structures
+            const fetchedData = res.data.data || res.data || res.data.tasks;
+            
+            // Ensure it is an actual array before setting state
+            setTasks(Array.isArray(fetchedData) ? fetchedData : []);
         } catch (error) {
             console.error("Failed to fetch tasks:", error);
         }
@@ -90,7 +95,7 @@ export default function Dashboard() {
         if (!draggedTaskId) return;
 
         const taskToUpdate = tasks.find(t => t._id === draggedTaskId);
-        if (taskToUpdate.status === newStatus) return;
+        if (!taskToUpdate || taskToUpdate.status === newStatus) return;
 
         // 1. Optimistic UI Update (Instant feedback for the user)
         setTasks(prevTasks => prevTasks.map(task => 
@@ -99,7 +104,8 @@ export default function Dashboard() {
 
         // 2. Background Database Update
         try {
-            await taskService.updateTask(draggedTaskId, {
+            // 👇 FIXED: Changed to taskService.update
+            await taskService.update(draggedTaskId, {
                 ...taskToUpdate,
                 status: newStatus
             });
