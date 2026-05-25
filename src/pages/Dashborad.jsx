@@ -38,7 +38,7 @@ export default function Dashboard() {
     const handleCreate = async (e) => {
         e.preventDefault();
         try {
-            await taskService.createTask({ title, description, status: "Pending", priority: "Medium" });
+            await taskService.create({ title, description, status: "Pending", priority: "Medium" });
             setTitle("");
             setDescription("");
             fetchTasks();
@@ -49,7 +49,7 @@ export default function Dashboard() {
 
     const handleDelete = async (id) => {
         try {
-            await taskService.deleteTask(id);
+            await taskService.delete(id);
             fetchTasks();
         } catch (error) {
             console.error(error);
@@ -60,7 +60,7 @@ export default function Dashboard() {
     const handleUpdate = async (e) => {
         e.preventDefault();
         try {
-            await taskService.updateTask(editingTask._id, {
+            await taskService.update(editingTask._id, {
                 title: editingTask.title,
                 description: editingTask.description,
                 status: editingTask.status,
