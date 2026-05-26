@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { taskService } from "../api/taskService";
 import { useNavigate } from "react-router-dom";
 
+// --- AUTH & SESSION HELPERS ---
 function readSessionUser() {
     try {
         const raw = localStorage.getItem("user");
@@ -30,6 +31,8 @@ function normalizeTasksResponse(res) {
 
 export default function Dashboard() {
     const [tasks, setTasks] = useState([]);
+    
+    // Modal & Form States
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
     const [title, setTitle] = useState("");
@@ -41,6 +44,7 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const sessionUser = useMemo(() => readSessionUser(), []);
 
+    // --- DATA FETCHING ---
     const refreshTasks = async () => {
         try {
             const res = await taskService.myTasks();
@@ -52,7 +56,6 @@ export default function Dashboard() {
 
     useEffect(() => {
         let cancelled = false;
-
         taskService.myTasks()
             .then((res) => {
                 if (!cancelled) setTasks(normalizeTasksResponse(res));
@@ -60,7 +63,6 @@ export default function Dashboard() {
             .catch((err) => {
                 if (!cancelled) console.error("Failed to fetch tasks:", err);
             });
-
         return () => { cancelled = true; };
     }, []);
 
@@ -145,6 +147,7 @@ export default function Dashboard() {
     };
 
     const closeModal = () => setIsModalOpen(false);
+    
     const logout = () => {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
@@ -274,6 +277,33 @@ export default function Dashboard() {
                             <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="DESIGNATION (Title)" required className="bg-transparent border-b border-[#3f4949] text-[#4ddada] font-['JetBrains_Mono'] p-2 outline-none focus:border-[#4ddada] focus:bg-[#1a1c1c] transition-colors rounded-none"/>
                             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="MISSION_BRIEF (Description)" required className="bg-transparent border-b border-[#3f4949] text-[#4ddada] font-['JetBrains_Mono'] p-2 outline-none focus:border-[#4ddada] focus:bg-[#1a1c1c] transition-colors h-24 resize-none rounded-none"/>
                             
+                            {/* --- AI ACTION BAR (SLM INTEGRATION) --- */}
+                            {!editingTask && description.length > 10 && (
+                                <div className="flex items-center gap-4 bg-[#1a1c1c] border border-[#3f4949] p-3 rounded-none">
+                                    <span className="material-symbols-outlined text-[#dac3a9]">auto_awesome</span>
+                                    <div className="flex-1">
+                                        <p className="font-['JetBrains_Mono'] text-xs text-[#e2e2e2]">MASSIVE EPIC DETECTED</p>
+                                        <p className="font-['JetBrains_Mono'] text-[10px] text-[#8c9291]">Deploy local SLM to auto-fragment this objective?</p>
+                                    </div>
+                                    <button 
+                                        type="button" 
+                                        onClick={async () => {
+                                            try {
+                                                await taskService.breakdown({ mission_brief: description });
+                                                closeModal();
+                                                refreshTasks(); 
+                                            } catch (err) {
+                                                console.error(err);
+                                                alert("AI Node Offline. Ensure FastAPI is running on Port 8000.");
+                                            }
+                                        }}
+                                        className="border border-[#dac3a9] text-[#dac3a9] hover:bg-[#dac3a9] hover:text-[#121414] font-['JetBrains_Mono'] font-bold text-xs px-3 py-2 transition-colors uppercase rounded-none shrink-0"
+                                    >
+                                        [AI_DECOMPILE]
+                                    </button>
+                                </div>
+                            )}
+
                             <div className="flex gap-4">
                                 {editingTask && (
                                     <select value={status} onChange={(e) => setStatus(e.target.value)} className="flex-1 bg-transparent border-b border-[#3f4949] text-[#e2e2e2] font-['JetBrains_Mono'] p-2 outline-none focus:border-[#4ddada] focus:bg-[#1a1c1c] [&>option]:bg-[#121414] rounded-none">
