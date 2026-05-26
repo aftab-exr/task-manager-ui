@@ -76,9 +76,6 @@ export default function LandingPage() {
                     onMouseEnter={() => setPaused(true)}
                     onMouseLeave={() => setPaused(false)}
                 >
-                    <p className="font-['JetBrains_Mono'] text-xs text-[#8c9291] uppercase tracking-widest mb-3">
-                        Available commands <span className="text-[#3A4D4D]">· click or auto-cycle</span>
-                    </p>
                     <div className="flex flex-wrap gap-2 mb-4">
                         {COMMANDS.map((cmd) => (
                             <button
