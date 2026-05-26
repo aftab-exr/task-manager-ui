@@ -1,12 +1,16 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export default function LandingPage() {
+    useEffect(() => {
+        document.title = "TASK_CMD";
+    }, []);
     return (
         <div className="min-h-screen flex flex-col bg-[#0c0f0f] text-[#e2e2e2]">
             {/* Top Bar */}
             <nav className="flex justify-between items-center p-6 border-b border-[#3A4D4D] max-w-[1440px] w-full mx-auto">
                 <div className="text-2xl font-extrabold tracking-widest text-[#e2e2e2]">
-                    OBSIDIAN<span className="text-[#00FFC2]">_PROTOCOL</span>
+                    TASK<span className="text-[#00FFC2]">_CMD</span>
                 </div>
                 <div className="flex gap-4">
                     <Link to="/login" className="obsidian-btn-secondary px-6 py-2 text-sm">Initialize</Link>
