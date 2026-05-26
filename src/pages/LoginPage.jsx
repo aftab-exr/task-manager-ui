@@ -11,48 +11,45 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(""); 
-        
         try {
-            console.log("1. Sending login request...");
             const res = await authService.login({ username, password });
-            
-            console.log("2. Backend responded!", res);
-
-            // Let's aggressively check if the token actually exists in the response
-            const token = res?.data?.token;
-
+            const token = res?.token ?? res?.data?.token;
             if (!token) {
-                console.error("🚨 CRITICAL ERROR: The backend did not send an accessToken!");
-                setError("Backend configuration error: No token received.");
-                return; // Stop the function here so it doesn't try to navigate
+                setError("ERR: INVALID_TOKEN_RESPONSE");
+                return;
             }
-
-            // If it made it this far, we have a real token
-            localStorage.setItem("token", res.data.token);
-            console.log("3. Token saved successfully. Navigating to Dashboard...");
-            
+            localStorage.setItem("token", token);
+            const user = res?.user ?? res?.data?.user ?? {
+                username,
+                fullName: res?.fullName ?? res?.data?.fullName,
+            };
+            localStorage.setItem("user", JSON.stringify(user));
             navigate("/dashboard");
-            
         } catch (err) {
-            console.error("LOGIN FAILED:", err);
-            setError(typeof err === "string" ? err : "Invalid username or password");
+            setError(typeof err === "string" ? err : "ERR: AUTHENTICATION_FAILED");
         }
     };
 
     return (
-        <div className="flex h-screen items-center justify-center bg-gray-100">
-            <form onSubmit={handleSubmit} className="bg-white p-8 rounded shadow-md w-96 flex flex-col gap-4">
-                <h2 className="text-2xl font-bold text-center mb-2">Log In</h2>
-                {error && <div className="bg-red-100 text-red-600 p-2 text-sm rounded">{error}</div>}
+        <div className="flex h-screen items-center justify-center bg-[#0c0f0f] px-4">
+            <form onSubmit={handleSubmit} className="bg-[#121414] border border-[#3A4D4D] p-10 w-full max-w-md flex flex-col gap-6 rounded-none">
+                <div className="border-b border-[#3A4D4D] pb-4 mb-2">
+                    <h2 className="text-2xl font-bold text-[#e2e2e2] tracking-widest">A_UTH_REQ</h2>
+                    <p className="font-['JetBrains_Mono'] text-xs text-[#8c9291] mt-1">Please provide clearance credentials.</p>
+                </div>
                 
-                <input type="text" placeholder="Username" required className="border p-2 rounded"
+                {error && <div className="bg-[#93000a] border border-[#ffb4ab] text-[#ffdad6] p-3 text-sm font-['JetBrains_Mono'] uppercase">! {error}</div>}
+                
+                <input type="text" placeholder="ID_STRING" required className="obsidian-input p-3"
                     onChange={(e) => setUsername(e.target.value)} />
                 
-                <input type="password" placeholder="Password" required className="border p-2 rounded"
+                <input type="password" placeholder="KEY_HASH" required className="obsidian-input p-3"
                     onChange={(e) => setPassword(e.target.value)} />
                 
-                <button type="submit" className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Log In</button>
-                <p className="text-sm text-center">Need an account? <Link to="/register" className="text-blue-600">Sign Up</Link></p>
+                <button type="submit" className="obsidian-btn-primary p-4 mt-4">Verify Identity</button>
+                <p className="text-xs text-center font-['JetBrains_Mono'] text-[#8c9291]">
+                    NO CLEARANCE? <Link to="/register" className="text-[#dac3a9] hover:text-[#00FFC2]">REQUEST ACCESS</Link>
+                </p>
             </form>
         </div>
     );
